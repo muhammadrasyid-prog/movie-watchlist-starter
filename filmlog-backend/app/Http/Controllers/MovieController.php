@@ -30,7 +30,7 @@ class MovieController extends Controller
                 $query->whereRaw('FIND_IN_SET(?, genres)', [$genre]);
             })
             ->orderBy('title')
-            ->paginate(20);
+            ->get();
 
         return response()->json($movies);
     }
