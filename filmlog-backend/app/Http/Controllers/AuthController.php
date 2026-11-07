@@ -14,7 +14,7 @@ class AuthController extends Controller
         $validatedData = $request->validate([
             'username' => ['required', 'string', 'max:255', 'unique:users,username'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password' => ['required', 'string', 'min:8'    ],
         ]);
 
         $user = User::create([
@@ -26,8 +26,8 @@ class AuthController extends Controller
         $token = auth('api')->login($user);
 
         return response()->json([
+            'token' => $token,
             'user' => $user,
-            'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => auth('api')->factory()->getTTL() * 60,
         ], 201);
@@ -47,8 +47,8 @@ class AuthController extends Controller
         }
 
         return response()->json([
+            'token' => $token,
             'user' => auth('api')->user(),
-            'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => auth('api')->factory()->getTTL() * 60,
         ]);
