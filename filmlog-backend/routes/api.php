@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MovieController;
 use App\Http\Controllers\WatchlistController;
 use App\Http\Controllers\WatchedController;
+use App\Http\Controllers\RecommendationController;
 
 Route::prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register']);
@@ -13,6 +14,7 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::get('/movies', [MovieController::class, 'index']);
+Route::post('/movies/recommend', [RecommendationController::class, 'recommend']);
 Route::get('/movies/{movie}', [MovieController::class, 'show']);
 
 Route::middleware('auth:api')->group(function () {
