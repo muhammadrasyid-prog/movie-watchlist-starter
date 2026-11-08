@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Movie;
 use App\Models\Watchlist;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Database\UniqueConstraintViolationException;
 
 class WatchlistController extends Controller
 {
@@ -43,16 +44,30 @@ class WatchlistController extends Controller
 
         $movieId = $validatedData['movie_id'] ?? $validatedData['movieId'];
 
-        $watchlist = Watchlist::create([
-            'user_id' => $request->user()->id,
-            'movie_id' => $validatedData['movie_id'],
-            'added_at' => now(),
-        ]);
+        // Cek apakah film sudah ada di watchlist user ini
+        $existing = Watchlist::where('user_id', $request->user()->id)
+            ->where('movie_id', $movieId)
+            ->first();
 
-        return response()->json([
-            'message' => 'Movie added to watchlist.',
-            'movie' => Movie::findOrFail($watchlist->movie_id),
-        ], $watchlist->wasRecentlyCreated ? 201 : 200);
+        if ($existing) {
+            return response()->json(['message' => 'Film sudah ada di watchlist.'], 409);
+        }
+
+        try {
+            $watchlist = Watchlist::create([
+                'user_id' => $request->user()->id,
+                'movie_id' => $movieId,
+                'added_at' => now(),
+            ]);
+
+            return response()->json([
+                'message' => 'Movie added to watchlist.',
+                'movie' => Movie::findOrFail($watchlist->movie_id),
+            ], $watchlist->wasRecentlyCreated ? 201 : 200);
+        } catch (UniqueConstraintViolationException $e) {
+            // Pengaman untuk request bersamaan
+            return response()->json(['message' => 'Film sudah ada di watchlist.'], 409);
+        }
     }
 
     /**
